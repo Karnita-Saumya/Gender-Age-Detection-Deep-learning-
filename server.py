@@ -11,21 +11,44 @@ app = Flask(__name__, template_folder='templates', static_folder='static')
 CORS(app)
 
 # model files (assumed to be in project root)
-faceProto = "opencv_face_detector.pbtxt"
-faceModel = "opencv_face_detector_uint8.pb"
-ageProto = "age_deploy.prototxt"
-ageModel = "age_net.caffemodel"
-genderProto = "gender_deploy.prototxt"
-genderModel = "gender_net.caffemodel"
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+faceProto = os.path.join(BASE_DIR, "opencv_face_detector.pbtxt")
+faceModel = os.path.join(BASE_DIR, "opencv_face_detector_uint8.pb")
+ageProto = os.path.join(BASE_DIR, "age_deploy.prototxt")
+ageModel = os.path.join(BASE_DIR, "age_net.caffemodel")
+genderProto = os.path.join(BASE_DIR, "gender_deploy.prototxt")
+genderModel = os.path.join(BASE_DIR, "gender_net.caffemodel")
 
 MODEL_MEAN_VALUES = (78.4263377603, 87.7689143744, 114.895847746)
 ageList = ['(0-2)', '(4-6)', '(8-12)', '(15-20)', '(25-32)', '(38-43)', '(48-53)', '(60-100)']
 genderList = ['Male', 'Female']
 
-# load nets once
-faceNet = cv2.dnn.readNet(faceModel, faceProto)
-ageNet = cv2.dnn.readNet(ageModel, ageProto)
-genderNet = cv2.dnn.readNet(genderModel, genderProto)
+# load nets once (with diagnostics to help Render logs if files are missing)
+import logging
+logging.basicConfig(level=logging.INFO)
+
+def _print_file_info(path):
+    try:
+        exists = os.path.exists(path)
+        size = os.path.getsize(path) if exists else 0
+        logging.info("Model file: %s exists=%s size=%d", path, exists, size)
+    except Exception as e:
+        logging.error("Error checking file %s: %s", path, e)
+
+_print_file_info(faceModel)
+_print_file_info(faceProto)
+_print_file_info(ageModel)
+_print_file_info(ageProto)
+_print_file_info(genderModel)
+
+try:
+    faceNet = cv2.dnn.readNet(faceModel, faceProto)
+    ageNet = cv2.dnn.readNet(ageModel, ageProto)
+    genderNet = cv2.dnn.readNet(genderModel, genderProto)
+    logging.info("Successfully loaded DNN models.")
+except Exception as e:
+    logging.exception("Failed to load DNN models: %s", e)
+    raise
 
 
 def read_image_file(file_storage):
