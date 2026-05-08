@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>Gender & Age Detection</title>
+    <link rel="stylesheet" href="/static/style.css">
+  </head>
+  <body>
+    <div class="container">
+      <h1>Gender & Age Detection</h1>
+      <div class="uploader">
+        <input id="fileInput" type="file" accept="image/*">
+        <button id="submitBtn">Analyze</button>
+      </div>
+      <div id="result" class="result">
+        <img id="resultImg" src="" alt="result" />
+        <div id="meta" class="meta"></div>
+      </div>
+      <p class="note">You can also open your webcam by leaving the input empty and clicking Analyze (future enhancement).</p>
+    </div>
+
+    <script>
+    const input = document.getElementById('fileInput')
+    const btn = document.getElementById('submitBtn')
+    const resultImg = document.getElementById('resultImg')
+    const meta = document.getElementById('meta')
+
+    btn.addEventListener('click', async () => {
+      meta.innerText = 'Processing...'
+      const fd = new FormData()
+      if (input.files.length > 0) fd.append('image', input.files[0])
+      else {
+        alert('Please select an image file')
+        meta.innerText = ''
+        return
+      }
+
+      try {
+        const res = await fetch('/predict', { method: 'POST', body: fd })
+        const data = await res.json()
+        if (data.result_image) {
+          resultImg.src = 'data:image/jpg;base64,' + data.result_image
+        }
+        if (data.faces && data.faces.length > 0) {
+          meta.innerHTML = data.faces.map((f,i)=>`<div class="card"><b>Face ${i+1}</b><br>Gender: ${f.gender}<br>Age: ${f.age}</div>`).join('')
+        } else {
+          meta.innerText = 'No faces detected.'
+        }
+      } catch (err) {
+        meta.innerText = 'Error: ' + err.message
+      }
+    })
+    </script>
+  </body>
+</html>

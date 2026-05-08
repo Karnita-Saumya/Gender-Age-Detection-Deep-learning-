@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Virtual env
+venv/
+
+# IDEs
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Models and large binaries (commit separately via Git LFS or external storage)
+*.caffemodel
+*.pb
+*.prototxt
+*.pbtxt
+
+# Docker
+dist/
+build/
