@@ -65,6 +65,23 @@ def index():
     return render_template('index.html')
 
 
+@app.route('/index.html')
+def index_html():
+    return render_template('index.html')
+
+
+@app.route('/healthz')
+def healthz():
+    return jsonify({'status': 'ok'})
+
+
+@app.route('/<path:path>', methods=['GET'])
+def spa_fallback(path):
+    if path.startswith('static/') or path == 'predict':
+        return jsonify({'error': 'not found'}), 404
+    return render_template('index.html')
+
+
 @app.route('/predict', methods=['POST'])
 def predict():
     if 'image' not in request.files:

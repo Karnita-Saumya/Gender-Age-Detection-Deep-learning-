@@ -1,6 +1,13 @@
 from server import app
 
 
+@app.route('/healthz')
+def healthz():
+    from flask import jsonify
+
+    return jsonify({'status': 'ok'})
+
+
 if __name__ == '__main__':
     import os
 
