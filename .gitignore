@@ -14,12 +14,6 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Models and large binaries (commit separately via Git LFS or external storage)
-*.caffemodel
-*.pb
-*.prototxt
-*.pbtxt
-
 # Docker
 dist/
 build/
