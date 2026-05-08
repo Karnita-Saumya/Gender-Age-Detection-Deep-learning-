@@ -41,14 +41,24 @@ _print_file_info(ageModel)
 _print_file_info(ageProto)
 _print_file_info(genderModel)
 
-try:
-    faceNet = cv2.dnn.readNet(faceModel, faceProto)
-    ageNet = cv2.dnn.readNet(ageModel, ageProto)
-    genderNet = cv2.dnn.readNet(genderModel, genderProto)
-    logging.info("Successfully loaded DNN models.")
-except Exception as e:
-    logging.exception("Failed to load DNN models: %s", e)
-    raise
+# Lazy-load the DNNs so gunicorn workers don't crash at import time.
+faceNet = None
+ageNet = None
+genderNet = None
+
+def get_nets():
+    """Return loaded nets, loading them on first call. Returns (None, None, None) on failure."""
+    global faceNet, ageNet, genderNet
+    if faceNet is None or ageNet is None or genderNet is None:
+        try:
+            faceNet = cv2.dnn.readNet(faceModel, faceProto)
+            ageNet = cv2.dnn.readNet(ageModel, ageProto)
+            genderNet = cv2.dnn.readNet(genderModel, genderProto)
+            logging.info("Successfully loaded DNN models.")
+        except Exception:
+            logging.exception("Failed to load DNN models; check files and formats")
+            faceNet = ageNet = genderNet = None
+    return faceNet, ageNet, genderNet
 
 
 def read_image_file(file_storage):
@@ -109,6 +119,10 @@ def spa_fallback(path):
 def predict():
     if 'image' not in request.files:
         return jsonify({'error': 'no image provided'}), 400
+    # ensure models are loaded
+    faceNet, ageNet, genderNet = get_nets()
+    if faceNet is None or ageNet is None or genderNet is None:
+        return jsonify({'error': 'models not loaded on server; check logs'}), 500
 
     file = request.files['image']
     frame = read_image_file(file)
