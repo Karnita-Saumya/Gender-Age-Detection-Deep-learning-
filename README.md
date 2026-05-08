@@ -1,5 +1,5 @@
-<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2334b957-1364-41fe-a3ae-36ba519313a5" /><div align="center">
-
+<div align="center">
+<img src="https://readme-typing-svg.demolab.com?font=Fira+Code&size=30&pause=1000&color=6C63FF&center=true&vCenter=true&width=600&lines=Gender+%26+Age+Detection;Powered+by+Deep+Learning;OpenCV+%2B+Flask+%2B+Docker" alt="Typing SVG" /
 
 
 <br/>
